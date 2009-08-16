@@ -10,7 +10,7 @@
 #
 
 import sys, os, stat, errno, time
-from syslog import *
+import syslog as s
 import fuse
 from fuse import Fuse
 
@@ -105,7 +105,7 @@ class PyHesiodFS(Fuse):
     def __init__(self, *args, **kwargs):
         Fuse.__init__(self, *args, **kwargs)
         
-        openlog('pyhesiodfs', 0, LOG_DAEMON)
+        s.openlog('pyhesiodfs', 0, s.LOG_DAEMON)
         
         try:
             self.fuse_args.add("allow_other", True)
@@ -181,7 +181,7 @@ class PyHesiodFS(Fuse):
             else:
                 rw = ro.replace('/afs/', '/afs/.', 1)
                 self.mounts[self._uid()][name] = rw
-                syslog(LOG_INFO, "Mounting "+name+" on "+rw)
+                s.syslog(s.LOG_INFO, "Mounting "+name+" on "+rw)
                 return rw
         else:
             try:
@@ -196,14 +196,14 @@ class PyHesiodFS(Fuse):
                 pointers = filsys.filsys
                 pointer = pointers[0]
                 if pointer['type'] != 'AFS' and pointer['type'] != 'LOC':
-                    syslog(LOG_NOTICE, "Unknown locker type "+pointer['type']+" for locker "+name+" ("+repr(pointer)+" )")
+                    s.syslog(s.LOG_NOTICE, "Unknown locker type "+pointer['type']+" for locker "+name+" ("+repr(pointer)+" )")
                     return None
                 else:
                     self.mounts[self._uid()][name] = pointer['location']
-                    syslog(LOG_INFO, "Mounting "+name+" on "+pointer['location'])
+                    s.syslog(s.LOG_INFO, "Mounting "+name+" on "+pointer['location'])
                     return pointer['location']
             else:
-                syslog(LOG_WARNING, "Couldn't find filsys for "+name)
+                s.syslog(s.LOG_WARNING, "Couldn't find filsys for "+name)
                 return None
 
     def getdir(self, path):
