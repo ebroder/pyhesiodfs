@@ -72,8 +72,8 @@ new_fuse = hasattr(fuse, '__version__')
 
 fuse.fuse_python_api = (0, 2)
 
-hello_path = '/README.txt'
-hello_str = """This is the pyhesiodfs FUSE autmounter. To access a Hesiod filsys, just access
+readme_path = '/README.txt'
+readme_str = """This is the pyhesiodfs FUSE autmounter. To access a Hesiod filsys, just access
 %(mountpoint)s/name.
 
 If you're using the Finder, try pressing Cmd+Shift+G and then entering
@@ -148,10 +148,10 @@ class PyHesiodFS(Fuse):
                 st.st_mode = stat.S_IFDIR | 0755
             st.st_gid = self._gid()
             st.st_nlink = 2
-        elif path == hello_path:
+        elif path == readme_path:
             st.st_mode = stat.S_IFREG | 0444
             st.st_nlink = 1
-            st.st_size = len(hello_str)
+            st.st_size = len(readme_str)
         elif '/' not in path[1:]:
             if path[1:] not in self.negcache[self._uid()] and self.findLocker(path[1:]):
                 st.st_mode = stat.S_IFLNK | 0777
@@ -207,7 +207,7 @@ class PyHesiodFS(Fuse):
                 return None
 
     def getdir(self, path):
-        return [(i, 0) for i in (['.', '..', hello_path[1:]] + self.getCachedLockers())]
+        return [(i, 0) for i in (['.', '..', readme_path[1:]] + self.getCachedLockers())]
 
     def readdir(self, path, offset):
         for (r, zero) in self.getdir(path):
@@ -217,26 +217,26 @@ class PyHesiodFS(Fuse):
         return self.findLocker(path[1:])
 
     def open(self, path, flags):
-        if path != hello_path:
+        if path != readme_path:
             return -errno.ENOENT
         accmode = os.O_RDONLY | os.O_WRONLY | os.O_RDWR
         if (flags & accmode) != os.O_RDONLY:
             return -errno.EACCES
 
     def read(self, path, size, offset):
-        if path != hello_path:
+        if path != readme_path:
             return -errno.ENOENT
-        slen = len(hello_str)
+        slen = len(readme_str)
         if offset < slen:
             if offset + size > slen:
                 size = slen - offset
-            buf = hello_str[offset:offset+size]
+            buf = readme_str[offset:offset+size]
         else:
             buf = ''
         return buf
     
     def symlink(self, src, path):
-        if path == '/' or path == hello_path:
+        if path == '/' or path == readme_path:
             return -errno.EPERM
         elif '/' not in path[1:]:
             self.mounts[self._uid()][path[1:]] = src
@@ -245,7 +245,7 @@ class PyHesiodFS(Fuse):
             return -errno.EPERM
     
     def unlink(self, path):
-        if path == '/' or path == hello_path:
+        if path == '/' or path == readme_path:
             return -errno.EPERM
         elif '/' not in path[1:]:
             del self.mounts[self._uid()][path[1:]]
@@ -254,7 +254,7 @@ class PyHesiodFS(Fuse):
             return -errno.EPERM
 
 def main():
-    global hello_str
+    global readme_str
     try:
         usage = Fuse.fusage
         server = PyHesiodFS(version="%prog " + fuse.__version__,
@@ -270,7 +270,7 @@ pyHesiodFS [mountpath] [options]
             sys.argv.pop(1)
         server = PyHesiodFS()
 
-    hello_str = hello_str % {'mountpoint': server.parse(errex=1).mountpoint}
+    readme_str = readme_str % {'mountpoint': server.parse(errex=1).mountpoint}
     server.main()
 
 if __name__ == '__main__':
