@@ -8,7 +8,7 @@
 	<false/>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/usr/local/bin/pyHesiodFS.py</string>
+		<string>/usr/local/bin/pyhesiodfs</string>
 		<string>-f</string>
 		<string>/mit</string>
 	</array>
