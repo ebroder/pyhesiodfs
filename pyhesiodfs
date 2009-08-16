@@ -9,12 +9,15 @@
 #    See the file COPYING.
 #
 
-import sys, os, stat, errno, time
+import errno
+import os
+import stat
+import sys
 import syslog as s
-import fuse
-from fuse import Fuse
+import time
 
 import hesiod
+import fuse
 
 try:
     from collections import defaultdict
@@ -100,10 +103,10 @@ class MyStat(fuse.Stat):
                 self.st_uid, self.st_gid, self.st_size, self.st_atime,
                 self.st_mtime, self.st_ctime)
 
-class PyHesiodFS(Fuse):
+class PyHesiodFS(fuse.Fuse):
 
     def __init__(self, *args, **kwargs):
-        Fuse.__init__(self, *args, **kwargs)
+        fuse.Fuse.__init__(self, *args, **kwargs)
         
         s.openlog('pyhesiodfs', 0, s.LOG_DAEMON)
         
@@ -256,7 +259,7 @@ class PyHesiodFS(Fuse):
 def main():
     global readme_str
     try:
-        usage = Fuse.fusage
+        usage = fuse.Fuse.fusage
         server = PyHesiodFS(version="%prog " + fuse.__version__,
                             usage=usage,
                             dash_s_do='setsingle')
